@@ -1,5 +1,5 @@
 # Projet_incendie
-Le projet du groupe, Karim, Léon, Salah, Cherif
+Le projet du groupe, Karim, Léon, Salah, Cherif, $issouf, sissokho abdoulah
 
 responsable projet: salah
 
