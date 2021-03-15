@@ -27,6 +27,13 @@ import tkinter as tk
 
 #####################################
 # Constantes
+LARGEUR = 700
+HAUTEUR = 700
+
+# Constantes correspondant a une durée
+#DUREE_FEU = 
+#DUREE_CENDRE = 
+
 
 #####################################
 # Variables globales (si besoin)
@@ -34,6 +41,15 @@ import tkinter as tk
 #####################################
 # Fonctions principales
 
+def clique_utilisateur():
+    pass
+
 
 #####################################
 # Placement des widgets
+
+canvas = tk.Canvas(racine, bg="black", width=LARGEUR, height=HAUTEUR)
+canvas.grid(column=0, row=0)
+
+
+canvas.bind('<1>', clique_utilisateur)
