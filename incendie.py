@@ -136,11 +136,11 @@ def clique_utilisateur(event):
     colonne = event.x // hauteur_rec
     ligne = event.y // largeur_rec
 
-    #if tableau[ligne][colonne][1] == "Forêt" or tableau[ligne][colonne][1] == "Prairie":
+    if tableau[ligne][colonne][1] == "Forêt" or tableau[ligne][colonne][1] == "Prairie":
 
-    canvas.itemconfigure(tableau[ligne][colonne][0], fill="red")
+        canvas.itemconfigure(tableau[ligne][colonne][0], fill="red")
 
-    tableau[ligne][colonne][1] = "Feu"
+        tableau[ligne][colonne][1] = "Feu"
 
 
 def type_aleatoire():
