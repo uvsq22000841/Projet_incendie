@@ -25,7 +25,8 @@
 # Modules importés: tkinter, random
 import tkinter as tk
 import random
-from tkinter.constants import N
+
+
 
 #####################################
 # Constantes
@@ -33,8 +34,11 @@ LARGEUR = 700
 HAUTEUR = 700
 
 # Constantes correspondant a une durée
-#DUREE_FEU = 
-#DUREE_CENDRE = 
+DUREE_FEU = 10
+DUREE_CENDRE = 10 
+
+
+
 
 #####################################
 # Variables globales (si besoin)
@@ -50,8 +54,23 @@ couleurs = ['blue', 'green', 'red', 'yellow', 'gray', 'black']
 
 liste_a_changer = []
 
-#####################################
+# compte le nombre d'étape de la simulation
+etapes = 0
+
+#########################
 # Fonctions principales
+
+
+
+
+def compte_etape():
+    '''compte le nombre d'étape effectuée dans une simulation et l'affiche'''
+    global etapes
+
+    etapes += 1
+
+    label.configure(text=f"Nombres d'étapes: {etapes}")
+
 
 def to_change(i, a, type_pas, couleur):
     '''enregistre toutes les elements a changer a la fin, dans une liste'''
@@ -59,21 +78,24 @@ def to_change(i, a, type_pas, couleur):
 
     liste_a_changer.append([i, a, type_pas, couleur])
 
-    print(liste_a_changer)
 
 def change_tout():
     '''change tout les elements qui doivent être changer une fois toutes les passerelles vérifiés'''
-    global liste_a_changer
+    global liste_a_changer, tableau
 
     for element in liste_a_changer:
         tableau[ element[0] ][ element[1] ][1] = element[2]
         canvas.itemconfigure(tableau[ element[0] ][ element[1] ][0], fill=element[3])
-        
+
+    # on remet la liste_a_changer a zero
+
+    liste_a_changer = []
+
 
 
 def verifier_case_autour(i, a):
     '''verifier toutes les cases autour de prairiee'''
-    global n, m
+    global n, m, tableau
     # 8 cases autour à vérifier,  (i-1, a); (i-1,  a-1); (i-1, a+1); (i, a-1), (i, a+1)
     # (i+1, a); (i+1, a-1); (i+1, a+1)
 
@@ -122,15 +144,29 @@ def verifier_case_autour(i, a):
 
 def simulation():
     '''lance la simulation de l'incendie'''
-    global n, m
+    global n, m, tableau, DUREE_CENDRE
     for i in range(0, n):
         for a in range(0, m):
             if tableau[i][a][1] == "Prairie":
                 verifier_case_autour(i, a)
+            elif tableau[i][a][1] == "Feu":
+                tableau[i][a][2] -= 1
+                # si le temps est écoulée
+                if tableau[i][a][2] == 0:
+                    tableau[i][a][1] = "Cendres tièdes"
+                    tableau[i][a][2] = DUREE_CENDRE
+                    canvas.itemconfigure(tableau[i][a][0], fill="gray")
+            elif tableau[i][a][1] == "Cendres tièdes":
+                tableau[i][a][2] -= 1
 
-
+                if tableau[i][a][2] == 0:
+                    tableau[i][a][1] = "Cendres éteintes"
+                    canvas.itemconfigure(tableau[i][a][0], fill="black")
     # simulation finie on modifie les valeurs de chaque element
     change_tout()
+
+    # et on affiche le nombre d'étapes faites
+    compte_etape()
 
 
 def clique_utilisateur(event):
@@ -149,13 +185,19 @@ def clique_utilisateur(event):
 
 def type_aleatoire():
     '''renvoie un type aleatoire de passerelle'''
-    global type_passerelle, couleurs
+    global type_passerelle, couleurs, DUREE_FEU, DUREE_CENDRE
 
     nombre_aleatoire = random.randint(0, 5)
 
+    duree = 0
 
+    if type_passerelle[nombre_aleatoire] == "Feu":
+        duree = DUREE_FEU
 
-    return type_passerelle[nombre_aleatoire], couleurs[nombre_aleatoire]
+    elif type_passerelle[nombre_aleatoire] == "Cendres Tièdes":
+        duree= DUREE_CENDRE
+
+    return type_passerelle[nombre_aleatoire], couleurs[nombre_aleatoire], duree
 
 
 def division_du_canvas(n, m):
@@ -177,9 +219,9 @@ def quadrillage(n, m):
     for i in range(0, n):
         tableau.append([])
         for a in range(0, m):
-            type_pas, couleur_pas = type_aleatoire()
+            type_pas, couleur_pas, duree = type_aleatoire()
 
-            tableau[i].append([canvas.create_rectangle((a*hauteur_rec, i*largeur_rec), ((a+1)*hauteur_rec, (i+1)*largeur_rec), fill=couleur_pas, outline="white"), type_pas])
+            tableau[i].append([canvas.create_rectangle((a*hauteur_rec, i*largeur_rec), ((a+1)*hauteur_rec, (i+1)*largeur_rec), fill=couleur_pas, outline="white"), type_pas, duree])
 
     return tableau, largeur_rec, hauteur_rec, n, m
 #####################################
@@ -190,15 +232,25 @@ racine = tk.Tk()
 canvas = tk.Canvas(racine, bg="black", width=LARGEUR, height=HAUTEUR)
 canvas.grid(column=0, row=0)
 
-bouton = tk.Button(racine, text="Lancer simulation", command= lambda:simulation())
-bouton.grid(column = 0, row =1)
-
 
 tableau, largeur_rec, hauteur_rec, n, m = quadrillage(10, 20)
+
+
+bouton = tk.Button(racine, text="Une étape de simulation", command= lambda:simulation())
+bouton.grid(column = 0, row =1)
+
+label = tk.Label(racine,  text="Nombre d'étapes: 0")
+label.grid(column= 1, row=0)
+
+
+
+
 
 
 
 
 canvas.bind('<1>', clique_utilisateur)
+
+
 
 racine.mainloop()
