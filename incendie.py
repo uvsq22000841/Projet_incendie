@@ -1,7 +1,7 @@
 # Commentaire avant de coder:
-# 1. mettre les bouts de code dans les parties correspondantes..
+# 1. mettre les bouts de code dans les parties correspondantes..
 # .. Modules importés, Constantes, Variable globale, Fonction principale, Placement des widgets
-# 2. Tout le code les algorithmes, les if, else, les conditions, etc... doivent être mis.. 
+# 2. Tout le code les algorithmes, les if, else, les conditions, etc... doivent être mis.. 
 # ..dans les fonctions
 # 3. nommer les constantes en majuscule, mettez une docstring au debut de chaque fonction ..
 # et utiliser de bon noms, exemple creer_balle, LONGUEUR, etc...
@@ -72,19 +72,20 @@ def compte_etape():
     label.configure(text=f"Nombres d'étapes: {etapes}")
 
 
-def to_change(i, a, type_pas, couleur):
-    '''enregistre toutes les elements a changer a la fin, dans une liste'''
+def transformation_en_feu(i, a):
+    '''enregistre toutes les elements a changer en feu a la fin, dans une liste'''
     global liste_a_changer
 
-    liste_a_changer.append([i, a, type_pas, couleur])
+    liste_a_changer.append([i, a, "Feu", "red"])
 
 
 def change_tout():
     '''change tout les elements qui doivent être changer une fois toutes les passerelles vérifiés'''
-    global liste_a_changer, tableau
+    global liste_a_changer, tableau, DUREE_FEU
 
     for element in liste_a_changer:
         tableau[ element[0] ][ element[1] ][1] = element[2]
+        tableau[ element[0] ][ element[1] ][2] = DUREE_FEU 
         canvas.itemconfigure(tableau[ element[0] ][ element[1] ][0], fill=element[3])
 
     # on remet la liste_a_changer a zero
@@ -93,7 +94,7 @@ def change_tout():
 
 
 
-def verifier_case_autour(i, a):
+def verifier_case_autour(i, a, type_pas):
     '''verifier toutes les cases autour de prairiee'''
     global n, m, tableau
     # 8 cases autour à vérifier,  (i-1, a); (i-1,  a-1); (i-1, a+1); (i, a-1), (i, a+1)
@@ -137,10 +138,20 @@ def verifier_case_autour(i, a):
         if tableau[i+1][a][1] == "Feu":
             cpt += 1
 
-    # si prairie a plus de 4 voisins feu
-    if cpt >= 4:
-        to_change(i, a, "Feu", "red")
+    #si c'est une prairie
+    if type_pas == "Prairie":
+        # si prairie a plus de 4 voisins feu
+        if cpt >= 4:
+            transformation_en_feu(i, a)
 
+    #si c'est une forêt
+    if type_pas == "Forêt":
+        # x chance sur 10
+        proba = cpt * cpt
+        nb = random.randint(1, 10)
+        if nb <= proba:
+            transformation_en_feu(i, a)
+        
 
 def simulation():
     '''lance la simulation de l'incendie'''
@@ -148,7 +159,9 @@ def simulation():
     for i in range(0, n):
         for a in range(0, m):
             if tableau[i][a][1] == "Prairie":
-                verifier_case_autour(i, a)
+                verifier_case_autour(i, a, "Prairie")
+            elif tableau[i][a][1] == "Forêt":
+                verifier_case_autour(i, a, "Forêt")
             elif tableau[i][a][1] == "Feu":
                 tableau[i][a][2] -= 1
                 # si le temps est écoulée
@@ -171,7 +184,7 @@ def simulation():
 
 def clique_utilisateur(event):
     '''recupere le clique de l'utilisateur et modifie la passerelle correspondant au clique'''
-    global largeur_rec, hauteur_rec
+    global largeur_rec, hauteur_rec, DUREE_FEU
 
     colonne = event.x // hauteur_rec
     ligne = event.y // largeur_rec
@@ -181,7 +194,7 @@ def clique_utilisateur(event):
         canvas.itemconfigure(tableau[ligne][colonne][0], fill="red")
 
         tableau[ligne][colonne][1] = "Feu"
-
+        tableau[ligne][colonne][2] = DUREE_FEU
 
 def type_aleatoire():
     '''renvoie un type aleatoire de passerelle'''
@@ -191,10 +204,12 @@ def type_aleatoire():
 
     duree = 0
 
+    print(type_passerelle[nombre_aleatoire])
+
     if type_passerelle[nombre_aleatoire] == "Feu":
         duree = DUREE_FEU
 
-    elif type_passerelle[nombre_aleatoire] == "Cendres Tièdes":
+    elif type_passerelle[nombre_aleatoire] == "Cendres tièdes":
         duree= DUREE_CENDRE
 
     return type_passerelle[nombre_aleatoire], couleurs[nombre_aleatoire], duree
@@ -242,15 +257,8 @@ bouton.grid(column = 0, row =1)
 label = tk.Label(racine,  text="Nombre d'étapes: 0")
 label.grid(column= 1, row=0)
 
-
-
-
-
-
-
+print(tableau[0])
 
 canvas.bind('<1>', clique_utilisateur)
-
-
 
 racine.mainloop()
