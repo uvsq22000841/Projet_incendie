@@ -54,7 +54,7 @@ liste_a_changer = []
 # Fonctions principales
 
 def to_change(i, a, type_pas, couleur):
-    '''enregistre toutes les elements a changer dans une liste'''
+    '''enregistre toutes les elements a changer a la fin, dans une liste'''
     global liste_a_changer
 
     liste_a_changer.append([i, a, type_pas, couleur])
@@ -62,8 +62,13 @@ def to_change(i, a, type_pas, couleur):
     print(liste_a_changer)
 
 def change_tout():
-    '''change tout les elements qui doivent être changer, dans la liste liste_a_changer'''
+    '''change tout les elements qui doivent être changer une fois toutes les passerelles vérifiés'''
     global liste_a_changer
+
+    for element in liste_a_changer:
+        tableau[ element[0] ][ element[1] ][1] = element[2]
+        canvas.itemconfigure(tableau[ element[0] ][ element[1] ][0], fill=element[3])
+        
 
 
 def verifier_case_autour(i, a):
@@ -112,7 +117,7 @@ def verifier_case_autour(i, a):
 
     # si prairie a plus de 4 voisins feu
     if cpt >= 4:
-        to_change(i, a, "Feu", "Rouge")
+        to_change(i, a, "Feu", "red")
 
 
 def simulation():
@@ -121,7 +126,6 @@ def simulation():
     for i in range(0, n):
         for a in range(0, m):
             if tableau[i][a][1] == "Prairie":
-                
                 verifier_case_autour(i, a)
 
 
